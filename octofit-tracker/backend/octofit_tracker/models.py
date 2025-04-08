@@ -20,10 +20,3 @@ class Leaderboard(models.Model):
 class Workout(models.Model):
     type = models.CharField(max_length=100)
     # Additional fields...
-
-class ExerciseIssue(models.Model):
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-
-    def __str__(self):
-        return self.title

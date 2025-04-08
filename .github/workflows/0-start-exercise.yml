@@ -121,6 +121,22 @@ jobs:
             login=${{ github.actor }}
             intro_message=${{ env.INTRO_MESSAGE }}
 
+      - name: Create issue if not found
+        run: |
+          issue=$(gh issue list --state open --search "${{ env.ISSUE_TITLE_PREFIX }}" --json number,title,url | jq -r 'map(select(.title | startswith("${{ env.ISSUE_TITLE_PREFIX }}"))) | .[0]')
+          if [ -z "$issue" ]; then
+            new_issue=$(gh issue create --title "${{ env.ISSUE_TITLE_PREFIX }}: New Exercise" --body "This is a placeholder exercise issue." --json number,url)
+            echo "Created new issue: $new_issue"
+            echo "ISSUE_URL=$(echo $new_issue | jq -r '.url')" >> $GITHUB_ENV
+            echo "ISSUE_NUMBER=$(echo $new_issue | jq -r '.number')" >> $GITHUB_ENV
+          else
+            echo "Found existing issue: $issue"
+            echo "ISSUE_URL=$(echo $issue | jq -r '.url')" >> $GITHUB_ENV
+            echo "ISSUE_NUMBER=$(echo $issue | jq -r '.number')" >> $GITHUB_ENV
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create issue - add welcome message
         id: create-issue
         run: |
